@@ -9,7 +9,7 @@ use tower_http::{
 };
 use hyper::http::{HeaderName, HeaderValue};
 use axum::http::header;
-use crate::routes::safe::{create_safe, edit_safe, get_safe};
+use crate::routes::safe::handlers::{create_safe, edit_safe, get_safe};
 
 pub async fn create_router() -> Router {
     // Configure CORS

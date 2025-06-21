@@ -4,9 +4,13 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+async-trait = "0.1.88"
 axum = { version = "0.8.4", features = ["macros"] }
 hyper = { version = "1.6.0", features = ["full"] }
+serde = { version = "1.0.219", features = ["derive"] }
+thiserror = "2.0.12"
 tokio = { version = "1.45.1", features = ["full"] }
 tower = "0.5.2"
 tower-http = { version = "0.6.6", features = ["cors", "set-header", "fs"] }
+uuid = { version = "1.17.0", features = ["v4", "serde"] }
 
