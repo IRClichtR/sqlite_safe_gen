@@ -1,6 +1,9 @@
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use std::time::SystemTime;
+use axum::response::IntoResponse;
+use axum::Json;
+use serde_json::json;
 
 const VERSION_NUMBER: u32 = 1;
 
@@ -68,6 +71,26 @@ pub enum SafeError {
     InvalidData,
     #[error("Internal server error")]
     InternalError,
+}
+
+impl IntoResponse for SafeError {
+    fn into_response(self) -> axum::response::Response {
+        let (status, error_message) = match self {
+            SafeError::NotFound => (axum::http::StatusCode::NOT_FOUND, "Safe not found"),
+            SafeError::InvalidData => (axum::http::StatusCode::BAD_REQUEST, "Invalid request data"),
+            SafeError::InternalError => (axum::http::StatusCode::INTERNAL_SERVER_ERROR, "Internal server error"),
+        };
+
+        let body = json!({
+            "error": error_message,
+            "timestamp": SystemTime::now()
+                .duration_since(SystemTime::UNIX_EPOCH)
+                .unwrap_or_default()
+                .as_secs()
+        });
+
+        (status, Json(body)).into_response()
+    }
 }
 
 impl Safe {

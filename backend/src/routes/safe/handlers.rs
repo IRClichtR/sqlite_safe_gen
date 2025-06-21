@@ -1,18 +1,152 @@
+use axum::{
+    extract::{Path, State}, http::StatusCode, response::{IntoResponse}, Json
+};
+use crate::routes::{router::AppState, safe::models::GetSafeResponse};
+use crate::routes::safe::models::{
+    CreateSafeRequest, CreateSafeResponse, 
+    EditSafeRequest, EditSafeResponse,
+    SafeError, 
+    Safe};
 
+pub async fn create_safe(
+    State(state): State<AppState>,
+    Json(payload): Json<CreateSafeRequest>,
+) -> Result<impl IntoResponse, SafeError> {
+    // if !check_payload(&payload) {
+    //     return Err(SafeError::InvalidData);
+    // }
+    if payload.encrypted_blob.is_empty() {
+        return Err(SafeError::InvalidData);
+    }
 
-use axum::response::IntoResponse;
+    // TO_DO Validate rest of the payload
 
-pub async fn create_safe() -> impl IntoResponse {
-    println!("Creating a safe...");
-    "safe created successfully"
+    let safe = Safe::new(payload.encrypted_blob);
+
+    let created_safe = state
+        .storage
+        .create_safe(safe)
+        .await
+        .map_err(|_| SafeError::InternalError)?;
+
+    let response = CreateSafeResponse {
+        id: created_safe.id,
+        created_at: created_safe.created_at,
+        metadata: created_safe.metadata,
+    };
+
+    println!("Safe created with ID: {}", response.id);
+
+    Ok((StatusCode::CREATED, Json(response)))
 }
 
-pub async fn edit_safe() -> impl IntoResponse {
-    println!("Editing a safe...");
-    "Safe edited successfully"
+pub async fn get_safe(
+    State(state): State<AppState>,
+    Path(id): Path<String>,
+) -> Result<impl IntoResponse, SafeError> {
+    println!("Retrieving safe with ID: {}", id);
+
+    // TO_DO Validate rest of the payload
+
+    println!("Fetching safe from storage...");
+    match state.storage.get_safe(id.as_str()).await? {
+        Some(safe) => {
+            let response = GetSafeResponse {
+                id: safe.id,
+                encrypted_blob: safe.encrypted_blob,
+                created_at: safe.created_at,
+                updated_at: safe.updated_at,
+                metadata: safe.metadata,
+            };
+
+            println!("Safe retrieved successfully.");
+            Ok((StatusCode::OK, Json(response)))
+        }
+        None => {
+            println!("Safe not found.");
+            Err(SafeError::NotFound)
+        }
+    }
 }
 
-pub async fn get_safe() -> impl IntoResponse {
-    println!("Retrieving a safe...");
-    "Safe retrieved successfully"
+pub async fn edit_safe(
+    State(state): State<AppState>,
+    Path(id): Path<String>,
+    Json(payload): Json<EditSafeRequest>,
+) -> Result<impl IntoResponse, SafeError> {
+    println!("Editing safe with ID: {}", id);
+
+    let existing_safe = state
+        .storage
+        .get_safe(id.as_str())
+        .await
+        .map_err(|_| SafeError::InternalError)?;
+
+    // TO_DO Validate rest of the payload
+
+    let mut updated_safe = existing_safe;
+
+    updated_safe.update(
+        payload.encrypted_blob,
+        payload.metadata,
+    );
+
+    if updated_safe.encrypted_blob.is_empty() {
+        return Err(SafeError::InvalidData);
+    }
+
+    let final_safe = state
+        .storage
+        .edit_safe(id.as_str(), updated_safe)
+        .await
+        .map_err(|_| SafeError::InternalError)?;
+    
+
+    let response = EditSafeResponse {
+        id: final_safe.id,
+        updated_at: final_safe.updated_at,
+        metadata: final_safe.metadata,
+    };
+
+    println!("Safe edited successfully with ID: {}", response.id);
+    
+    Ok((StatusCode::OK, Json(response)))
+}
+
+pub async fn list_safes(
+    State(state): State<AppState>,
+) -> Result<impl IntoResponse, SafeError> {
+    println!("Listing all safes...");
+
+    let safes = state
+        .storage
+        .list_safes()
+        .await
+        .map_err(|_| SafeError::InternalError)?;
+
+    if safes.is_empty() {
+        println!("No safes found.");
+        return Ok((StatusCode::OK, Json(vec![])));
+    }
+
+    println!("Safes retrieved successfully.");
+    
+    Ok((StatusCode::OK, Json(safes)))
+}
+
+pub async fn delete_safe(
+    State(state): State<AppState>,
+    Path(id): Path<String>,
+) -> Result<impl IntoResponse, SafeError> {
+    println!("Deleting safe with ID: {}", id);
+
+    state
+        .storage
+        .delete_safe(id.as_str())
+        .await
+        .map_err(|_| SafeError::InternalError)?;
+
+    println!("Safe deleted successfully with ID: {}", id);
+    
+    Ok(StatusCode::NO_CONTENT)
 }

@@ -114,6 +114,7 @@ dependencies = [
  "axum",
  "hyper",
  "serde",
+ "serde_json",
  "thiserror",
  "tokio",
  "tower",

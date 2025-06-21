@@ -1,6 +1,6 @@
 use axum::{
     Router,
-    routing::{get, post, put},
+    routing::{get, post, put, delete},
     http::Method,
 };
 use tower_http::{
@@ -9,7 +9,30 @@ use tower_http::{
 };
 use hyper::http::{HeaderName, HeaderValue};
 use axum::http::header;
-use crate::routes::safe::handlers::{create_safe, edit_safe, get_safe};
+use std::sync::Arc;
+use crate::{
+    routes::safe::handlers::{
+        create_safe, 
+        edit_safe, 
+        get_safe, 
+        list_safes,
+        delete_safe
+    }, 
+    storage::traits::{SafeStorage, SafeStorageFactory},
+};
+
+#[derive(Clone)]
+pub struct AppState {
+    pub storage: Arc<dyn SafeStorage>,
+}
+
+impl AppState {
+    pub fn new(storage: Box<dyn SafeStorage>) -> Self {
+        Self {
+            storage: Arc::from(storage),
+         }
+    }
+}
 
 pub async fn create_router() -> Router {
     // Configure CORS
@@ -27,14 +50,21 @@ pub async fn create_router() -> Router {
         HeaderValue::from_static("nosniff"),
     );
 
+    // Create the application state
+    let storage = SafeStorageFactory::create_in_memory_storage();
+    let app_state = AppState::new(storage);
+
     // Create the router with routes
     Router::new()
     // Add nested routes here
-        .route("/", get(|| async { "Hello, World!" }))
+        .route("/", get(|| async { "Safe API ready to serve data!" }))
         .route("/health", get(|| async { "OK" }))
-        .route("/create-safe", post(create_safe))
-        .route("/get-safe", get(get_safe))
-        .route("/edit-safe", put(edit_safe))
+        .route("/safes", post(create_safe))
+        .route("/safes", get(list_safes))
+        .route("/safes/:id", get(get_safe))
+        .route("/safes/:id", put(edit_safe))
+        .route("/safes/:id", delete(delete_safe))
+        .with_state(app_state)
         .layer(cors)
         .layer(security_headers)
 }
