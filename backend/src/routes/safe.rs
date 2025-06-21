@@ -1,27 +1,18 @@
 
 
-use axum::response::Response as HttpResponse;
+use axum::response::IntoResponse;
 
-pub async fn create_safe() -> Result<HttpResponse, axum::Error> {
+pub async fn create_safe() -> impl IntoResponse {
     println!("Creating a safe...");
-    HttpResponse::builder()
-        .status(200)
-        .body("Safe created successfully".into())
-        .map_err(|e| axum::Error::new(e))
+    "safe created successfully"
 }
 
-pub async fn edit_safe() -> Result<HttpResponse, axum::Error> {
+pub async fn edit_safe() -> impl IntoResponse {
     println!("Editing a safe...");
-    HttpResponse::builder()
-        .status(200)
-        .body("Safe edited successfully".into())
-        .map_err(|e| axum::Error::new(e))
+    "Safe edited successfully"
 }
 
-pub async fn get_safe() -> Result<HttpResponse, axum::Error> {
+pub async fn get_safe() -> impl IntoResponse {
     println!("Retrieving a safe...");
-    HttpResponse::builder()
-        .status(200)
-        .body("Safe retrieved successfully".into())
-        .map_err(|e| axum::Error::new(e))
+    "Safe retrieved successfully"
 }
