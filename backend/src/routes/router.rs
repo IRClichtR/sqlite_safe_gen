@@ -65,7 +65,6 @@ pub fn create_router() -> Router {
         .with_state(app_state)
         .layer(cors)
         .layer(security_headers);
-    println!("Router /safes/:id get get_safe no panicking");
 
     router
 }

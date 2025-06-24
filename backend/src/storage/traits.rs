@@ -49,6 +49,8 @@ impl SafeStorage for InMemoryStorage {
         let id = safe.id.clone();
         safes.insert(id, safe.clone());
 
+        println!("{:?}", safe);
+
         println!("Safe created with ID: {}", safe.id);
         Ok(safe)
     }

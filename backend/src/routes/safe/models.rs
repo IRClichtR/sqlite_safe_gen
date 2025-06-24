@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use serde_with::{serde_as, TimestampMilliSeconds};
 use uuid::Uuid;
 use std::time::SystemTime;
 use axum::response::IntoResponse;
@@ -40,25 +41,32 @@ pub struct EditSafeRequest {
 //     pub id: Uuid,
 // }
 
+#[serde_as]
 #[derive(Debug, Serialize)]
 pub struct CreateSafeResponse {
     pub id: Uuid,
+    #[serde_as(as = "TimestampMilliSeconds<String>")]
     pub created_at: SystemTime,
     pub metadata: SafeMetadata,
 }
 
+#[serde_as]
 #[derive(Debug, Serialize)]
 pub struct EditSafeResponse {
     pub id: Uuid,
+    #[serde_as(as = "TimestampMilliSeconds<String>")]
     pub updated_at: SystemTime,
     pub metadata: SafeMetadata,
 }
 
-#[derive(Debug, Serialize)]
+#[serde_as]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct GetSafeResponse {
     pub id: Uuid,
     pub encrypted_blob: Vec<u8>,
+    #[serde_as(as = "TimestampMilliSeconds<String>")]
     pub created_at: SystemTime,
+    #[serde_as(as = "TimestampMilliSeconds<String>")]
     pub updated_at: SystemTime,
     pub metadata: SafeMetadata,
 }
