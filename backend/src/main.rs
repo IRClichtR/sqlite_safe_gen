@@ -11,8 +11,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     //Create AppState
 
     // create routes
-    let app = routes::router::create_router()
-        .await;
+    let app = routes::router::create_router();
+    println!("Router created successfully");
 
     //create addr
     let addr = SocketAddr::from(([127, 0, 0, 1], 8000));

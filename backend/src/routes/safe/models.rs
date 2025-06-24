@@ -13,11 +13,11 @@ pub struct Safe {
     pub encrypted_blob: Vec<u8>,
     pub created_at: SystemTime,
     pub updated_at: SystemTime,
-    pub metadata: SafeMatadata,
+    pub metadata: SafeMetadata,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct SafeMatadata {
+pub struct SafeMetadata {
     pub size: usize,
     pub version: u32,
 }
@@ -25,14 +25,14 @@ pub struct SafeMatadata {
 #[derive(Debug, Deserialize)]
 pub struct CreateSafeRequest {
     pub encrypted_blob: Vec<u8>,
-    pub metadata: SafeMatadata,
+    pub metadata: SafeMetadata,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct EditSafeRequest {
     pub id: Uuid,
     pub encrypted_blob: Option<Vec<u8>>,
-    pub metadata: Option<SafeMatadata>,
+    pub metadata: Option<SafeMetadata>,
 }
 
 // #[derive(Debug, Deserialize)]
@@ -44,14 +44,14 @@ pub struct EditSafeRequest {
 pub struct CreateSafeResponse {
     pub id: Uuid,
     pub created_at: SystemTime,
-    pub metadata: SafeMatadata,
+    pub metadata: SafeMetadata,
 }
 
 #[derive(Debug, Serialize)]
 pub struct EditSafeResponse {
     pub id: Uuid,
     pub updated_at: SystemTime,
-    pub metadata: SafeMatadata,
+    pub metadata: SafeMetadata,
 }
 
 #[derive(Debug, Serialize)]
@@ -60,7 +60,7 @@ pub struct GetSafeResponse {
     pub encrypted_blob: Vec<u8>,
     pub created_at: SystemTime,
     pub updated_at: SystemTime,
-    pub metadata: SafeMatadata,
+    pub metadata: SafeMetadata,
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -97,7 +97,7 @@ impl Safe {
     pub fn new(encrypted_blob: Vec<u8>) -> Self {
         let now = SystemTime::now();
 
-        let metadata = SafeMatadata {
+        let metadata = SafeMetadata {
             size: encrypted_blob.len(),
             version: VERSION_NUMBER,
         };
@@ -110,7 +110,7 @@ impl Safe {
         }
     }
 
-    pub fn update(&mut self, encrypted_blob: Option<Vec<u8>>, metadata: Option<SafeMatadata>) {
+    pub fn update(&mut self, encrypted_blob: Option<Vec<u8>>, metadata: Option<SafeMetadata>) {
         if let Some(blob) = encrypted_blob {
             self.encrypted_blob = blob;
         }

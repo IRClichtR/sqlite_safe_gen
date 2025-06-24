@@ -44,30 +44,25 @@ pub async fn get_safe(
     State(state): State<AppState>,
     Path(id): Path<String>,
 ) -> Result<impl IntoResponse, SafeError> {
+    println!("do i crash here ? {}", id);
     println!("Retrieving safe with ID: {}", id);
 
     // TO_DO Validate rest of the payload
 
     println!("Fetching safe from storage...");
-    match state.storage.get_safe(id.as_str()).await? {
-        Some(safe) => {
-            let response = GetSafeResponse {
-                id: safe.id,
-                encrypted_blob: safe.encrypted_blob,
-                created_at: safe.created_at,
-                updated_at: safe.updated_at,
-                metadata: safe.metadata,
-            };
+    let safe = state.storage.get_safe(id.as_str()).await?;
+    let response = GetSafeResponse {
+        id: safe.id,
+        encrypted_blob: safe.encrypted_blob,
+        created_at: safe.created_at,
+        updated_at: safe.updated_at,
+        metadata: safe.metadata,
+    };
 
-            println!("Safe retrieved successfully.");
-            Ok((StatusCode::OK, Json(response)))
-        }
-        None => {
-            println!("Safe not found.");
-            Err(SafeError::NotFound)
-        }
-    }
+    println!("Safe retrieved successfully.");
+    Ok((StatusCode::OK, Json(response)))
 }
+
 
 pub async fn edit_safe(
     State(state): State<AppState>,
