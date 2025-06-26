@@ -13,3 +13,23 @@ export interface CryptoSession {
     seed: string;
     derivedKey: CryptoKey;
 }
+
+//=======================================================================================================
+//=====================================DATABASE TYPES====================================================
+//=======================================================================================================
+
+export interface Document {
+    id: string;
+    fileName: string;
+    mime_type: string;
+    content: Uint8Array;
+    size: number;
+    created_at : number;
+    updated_at : number;
+}
+
+export interface SafeMetadata {
+    id: string;
+    size: number;
+    version: number;
+}
