@@ -25,11 +25,31 @@ export interface Document {
     content: Uint8Array;
     size: number;
     created_at : number;
-    updated_at : number;
+    // updated_at : number;
+}
+
+export interface DocumentInput {
+    fileName: string;
+    mime_type: string;
+    content: Uint8Array;
 }
 
 export interface SafeMetadata {
-    id: string;
-    size: number;
-    version: number;
+    name: string;
+    description: string;
+    created_at: number;
+    total_size: number;
+    document_count: number;
+}
+
+export interface SqlResult {
+    columns: string[];
+    values: unknown[][];
+}
+
+export class DbError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = 'DbError';
+    }
 }
