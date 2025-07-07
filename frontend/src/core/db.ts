@@ -11,13 +11,22 @@ const MAX_SIZE_SAFE = 10 * 1024 * 1024; // 10 MB, this is the maximum size of a 
 const MAX_DOCUMENTS = 50; // 50 documents, this is the maximum number of documents that can be stored in the database
 //=======================================================================================================
 
+//=========================================================================================================
+//=====================================Wasm path====================================================
+//=========================================================================================================
+// The path to the sql-wasm.wasm file, relative to the public directory
+const WASM_PATH = '/public/sql-wasm/sql-wasm.wasm';
+const WASM_PATH_JS = '/public/sql-wasm/sql-wasm.js';
+
 // Global variable for sql.js 
 let SQL: SqlJsStatic | null = null;
 // Helper to get paths
 function getWasmPath(): string {
-    if (typeof process !== 'undefined' && process.env.NODE_ENV === 'test') {
+    if (typeof process !== 'undefined' && process.env['NODE_ENV'] === 'test') {
         return ''
     }
+    
+    return WASM_PATH;
 }
 // Safe Schema
 const SCHEMA_SQL = `
@@ -41,13 +50,6 @@ const SCHEMA_SQL = `
     CREATE INDEX IF NOT EXISTS idx_filename ON documents(fileName);
     CREATE index IF NOT EXISTS idx_mime_type ON documents(mime_type);
 `;
-
-//=========================================================================================================
-//=====================================Wasm path====================================================
-//=========================================================================================================
-// The path to the sql-wasm.wasm file, relative to the public directory
-const WASM_PATH = '/public/sql-wasm/sql-wasm.wasm';
-const WASM_PATH_JS = '/public/sql-wasm/sql-wasm.js';
 
 //=========================================================================================================`
 //=====================================INITIALIZATION======================================================
