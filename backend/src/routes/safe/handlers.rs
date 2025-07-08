@@ -12,16 +12,18 @@ pub async fn create_safe(
     State(state): State<AppState>,
     Json(payload): Json<CreateSafeRequest>,
 ) -> Result<impl IntoResponse, SafeError> {
-    // if !check_payload(&payload) {
-    //     return Err(SafeError::InvalidData);
-    // }
     if payload.encrypted_blob.is_empty() {
         return Err(SafeError::InvalidData);
     }
 
     // TO_DO Validate rest of the payload
 
-    let safe = Safe::new(payload.encrypted_blob);
+    let safe_id = match payload.id {
+        Some(id) => id,
+        None => uuid::Uuid::new_v4(),
+    };
+    
+    let safe = Safe::new(Some(safe_id), payload.encrypted_blob);
 
     let created_safe = state
         .storage

@@ -25,6 +25,7 @@ pub struct SafeMetadata {
 
 #[derive(Debug, Deserialize)]
 pub struct CreateSafeRequest {
+    pub id: Option<Uuid>,
     pub encrypted_blob: Vec<u8>,
     pub metadata: SafeMetadata,
 }
@@ -102,7 +103,7 @@ impl IntoResponse for SafeError {
 }
 
 impl Safe {
-    pub fn new(encrypted_blob: Vec<u8>) -> Self {
+    pub fn new(id: Option<Uuid>, encrypted_blob: Vec<u8>) -> Self {
         let now = SystemTime::now();
 
         let metadata = SafeMetadata {
@@ -110,7 +111,7 @@ impl Safe {
             version: VERSION_NUMBER,
         };
         Safe {
-            id: Uuid::new_v4(),
+            id: id.unwrap_or_else(|| Uuid::new_v4()),
             encrypted_blob,
             created_at: now,
             updated_at: now,

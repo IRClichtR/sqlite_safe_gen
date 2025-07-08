@@ -37,7 +37,7 @@ impl AppState {
 pub fn create_router() -> Router {
     // Configure CORS
     let cors = CorsLayer::new()
-        .allow_origin(AllowOrigin::exact(HeaderValue::from_static("http://localhost:3000")))
+        .allow_origin(AllowOrigin::exact(HeaderValue::from_static("http://localhost:5173")))
         .allow_methods(vec![Method::GET, Method::POST, Method::PUT, Method::DELETE])
         .allow_headers([
             HeaderName::from_static("content-type"),

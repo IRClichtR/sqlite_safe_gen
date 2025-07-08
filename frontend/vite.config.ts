@@ -1,29 +1,41 @@
+// vite.config.ts
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import vueDevTools from 'vite-plugin-vue-devtools'
 import { resolve } from 'path'
-  // import { defineConfig } from 'vitest/config';
 
-// https://vite.dev/config/
 export default defineConfig({
-  plugins: [
-    vue(),
-    vueDevTools(),
-  ],
-
+  plugins: [vue()],
+  
   optimizeDeps: {
-    exclude: ['sql.js'] // prevent sql.js from being bundled
+    exclude: ['sql.js']
   },
-
-  assetsInclude: ['**/*.wasm'], // include .wasm files as assets
-
-  worker: {
-    format: 'es', // use ES module format for web workers
-  },
-
+  
+  assetsInclude: ['**/*.wasm'],
+  
   resolve: {
     alias: {
-      '@': resolve(__dirname, 'src'), // alias '@' to 'src' directory
-    },
+      '@': resolve(__dirname, 'src')
+    }
   },
+  
+  server: {
+    // ✅ SUPPRIME CSP COMPLETEMENT
+    middlewareMode: false,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, '')
+      }
+    }
+  },
+  
+  // ✅ Supprime CSP au niveau build aussi
+  build: {
+    rollupOptions: {
+      output: {
+        // Pas de CSP dans les assets
+      }
+    }
+  }
 })

@@ -1,4 +1,7 @@
-import initSqlJs, { Database, SqlJsStatic } from 'sql.js';
+// import initSqlJs, { Database, SqlJsStatic } from 'sql.js';
+// import * as initSqlJs from 'sql.js';
+// import initSqlJs from 'sql.js';
+import type { Database, SqlJsStatic } from 'sql.js';
 import { 
     Document, 
     DocumentInput, 
@@ -15,19 +18,25 @@ const MAX_DOCUMENTS = 50; // 50 documents, this is the maximum number of documen
 //=====================================Wasm path====================================================
 //=========================================================================================================
 // The path to the sql-wasm.wasm file, relative to the public directory
-const WASM_PATH = '/public/sql-wasm/sql-wasm.wasm';
-const WASM_PATH_JS = '/public/sql-wasm/sql-wasm.js';
+// const WASM_PATH = '/public/sql-wasm/sql-wasm.wasm';
+// const WASM_PATH_JS = '/public/sql-wasm/sql-wasm.js';
 
 // Global variable for sql.js 
+declare global {
+    interface Window {
+        initSqlJs: any;
+    }
+}
+
 let SQL: SqlJsStatic | null = null;
 // Helper to get paths
-function getWasmPath(): string {
-    if (typeof process !== 'undefined' && process.env['NODE_ENV'] === 'test') {
-        return ''
-    }
+// function getWasmPath(): string {
+//     if (typeof process !== 'undefined' && process.env['NODE_ENV'] === 'test') {
+//         return ''
+//     }
     
-    return WASM_PATH;
-}
+//     return WASM_PATH;
+// }
 // Safe Schema
 const SCHEMA_SQL = `
     CREATE TABLE IF NOT EXISTS documents (
@@ -55,18 +64,40 @@ const SCHEMA_SQL = `
 //=====================================INITIALIZATION======================================================
 //=========================================================================================================
 
+// loadScript helper function to dynamically load scripts
+function loadScript(src: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = src;
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error(`Failed to load script: ${src}`));
+        document.head.appendChild(script);
+    });
+}
+
 // Init sql.js
 export async function initDb(): Promise<void> {
-    if (SQL) return; // Already initialized
-
+    if (SQL) return;
     try {
-        SQL = await initSqlJs({
-            locateFile: (file: string) => `/public/sql-wasm/${file}`
+        console.log('Initializing SQL.js...');
+        if (!window.initSqlJs) {
+            const script = document.createElement('script');
+            script.src = '/sql-wasm/sql-wasm.js';
+
+            await new Promise<void>((resolve, reject) => {
+                script.onload = () => resolve();
+                script.onerror = () => reject(new Error('Failed to load SQL.js script'));
+                document.head.appendChild(script);
+            });
+        }
+
+        SQL = await window.initSqlJs({
+            locateFile: (file: string) => `/sql-wasm/${file}`
         });
         console.log('SQL.js initialized successfully');
     } catch (error) {
         console.error('Error initializing SQL.js:', error);
-        throw new Error('Failed to initialize SQL.js');
+        throw new DbError('Failed to initialize SQL.js');
     }
 }
 

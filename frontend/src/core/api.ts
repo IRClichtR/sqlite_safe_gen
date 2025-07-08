@@ -1,6 +1,8 @@
+import { CreateSafeResponse } from "@/types";
+
 const API_BASE = 'http://localhost:8000'
 
-export async function uploadSafe(identifier: string, data: Uint8Array): Promise<void> {
+export async function uploadSafe(identifier: string, data: Uint8Array): Promise<CreateSafeResponse> {
     try {
         const response = await fetch(`${API_BASE}/safes`, {
             method: 'POST',
@@ -8,6 +10,7 @@ export async function uploadSafe(identifier: string, data: Uint8Array): Promise<
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
+                id: identifier,
                 encrypted_blob: Array.from(data),
                 metadata: {
                     size: data.length,
@@ -17,16 +20,22 @@ export async function uploadSafe(identifier: string, data: Uint8Array): Promise<
         });
 
         if (!response.ok) {
-            throw new Error(`Failed to upload safe: ${response.statusText}`);
+            const errorText = await response.text();
+            throw new Error(`HTTP $(response.status): ${errorText}`);
         }
+
+        const result = await response.json();
+        return result as CreateSafeResponse;
     } catch (error) {
         console.error('Error uploading safe:', error);
-        throw error; // Re-throw the error for further handling if needed
+        throw error;
     }
 }
 
 export async function downloadSafe(identifier: string): Promise<Uint8Array> {
     try {
+        console.log('Downloading safe with identifier:', identifier);
+
         const response = await fetch(`${API_BASE}/safes/${identifier}`);
 
         if (!response.ok) {

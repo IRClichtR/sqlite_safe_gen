@@ -5,7 +5,7 @@ import { SecureUrl } from '../types';
 //=======================================================================================================
 
 // Generate radom 16 byte array for identifier
-function generateRandomBytes(length: number): Uint8Array {
+export function generateRandomBytes(length: number): Uint8Array {
     return crypto.getRandomValues(new Uint8Array(length));
 }
 // Encode into base64
@@ -86,13 +86,38 @@ export function parseSecureUrl(url: string): SecureUrl | null {
     return null;
 }
 
+function uuidToBytes(uuid: string): Uint8Array {
+    const hex = uuid.replace(/-/g, '');
+    if (hex.length !== 32) {
+        throw new Error('Invalid UUID format');
+    }
+    const bytes = new Uint8Array(16);
+    for (let i = 0; i < 16; i++) {
+        bytes[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
+    }
+    return bytes;
+}
+
 /** Decode seed from base64
 * calculate salt = sha256 identifier
 * implement PBKDF2 with 100k iterations
 */
 export async function deriveKey(seed: string, identifier: string): Promise<CryptoKey> {
+    console.log('Deriving key with seed:', seed);
+    console.log('Using identifier:', identifier);
+    console.log('identifier type:', identifier.includes('-') ? 'UUID' : 'Base64Url');
+
     const seedBytes = base64UrlToBytes(seed);
-    const identifierBytes = base64UrlToBytes(identifier);
+    let identifierBytes: Uint8Array;
+
+    if (identifier.includes('-')) {
+        // If identifier is a UUID, convert it to bytes
+        identifierBytes = uuidToBytes(identifier);
+    } else {
+        // Otherwise, assume it's a base64url encoded string
+        identifierBytes = base64UrlToBytes(identifier);
+    }
+
     const saltBuffer = await crypto.subtle.digest('SHA-256', identifierBytes.buffer as ArrayBuffer);
 
     const seedKey = await crypto.subtle.importKey(
