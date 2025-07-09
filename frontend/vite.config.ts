@@ -19,7 +19,7 @@ export default defineConfig({
   },
   
   server: {
-    // ✅ SUPPRIME CSP COMPLETEMENT
+    host: '0.0.0.0',
     middlewareMode: false,
     proxy: {
       '/api': {
