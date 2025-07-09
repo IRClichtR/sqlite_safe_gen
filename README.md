@@ -34,19 +34,11 @@ This is an educational prototype that shows:
 
 ## Get started
 ### Prerequisits
-- Node.js 18+
-- Rust 1.70+
+- docker
 - Modern browser with Crypto API support
 
-Start backend and Frontend in separate terminals
 ```bash
-cd backend
-cargo run
-```
-
-```bash
-cd frontend
-npm run dev
+docker compose up -d
 ```
 
 ## Features
