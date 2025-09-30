@@ -88,4 +88,4 @@ This project demonstrates:
 
 ## Acknowledgments
 
-While I tend to specialize into backend development, pure frontend component creation remains difficult for me. I largly used claude sonnet 4 for debugging and component coding.
+While I tend to specialize into backend development, pure frontend component creation remains difficult for me.
